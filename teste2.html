@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Teste Insano – Unidade V (Redes Corporativas e Internet)</title>
+
+<style>
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, Arial, sans-serif;
+  background: linear-gradient(135deg, #1b262c, #0f4c75, #3282b8);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 30px;
+  color: #fff;
+}
+
+#app {
+  background: #ffffff;
+  width: 95%;
+  max-width: 950px;
+  border-radius: 18px;
+  padding: 28px;
+  box-shadow: 0 15px 45px rgba(0,0,0,0.35);
+  color: #1b262c;
+}
+
+h1 {
+  font-size: 26px;
+  margin: 0;
+  color: #0f4c75;
+}
+
+h2 {
+  margin: 5px 0 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: #444;
+}
+
+.badge {
+  background: #eaf4ff;
+  padding: 4px 10px;
+  border-radius: 50px;
+  font-size: 11px;
+  color: #0f4c75;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.progress-wrapper { margin-bottom: 20px; }
+
+.progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #222;
+}
+
+.progress-bar-bg {
+  width: 100%;
+  height: 10px;
+  background: #dce6f2;
+  border-radius: 50px;
+}
+
+.progress-bar-fill {
+  height: 10px;
+  width: 0%;
+  background: linear-gradient(90deg, #00b894, #00cec9);
+  border-radius: 50px;
+  transition: 0.3s ease;
+}
+
+.card {
+  background: #f8fbff;
+  padding: 22px;
+  border-radius: 16px;
+  border: 1px solid #dce6f2;
+}
+
+.questao-numero {
+  font-size: 14px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #0f4c75;
+}
+
+.questao-texto {
+  font-size: 18px;
+  margin: 16px 0;
+  line-height: 1.4;
+}
+
+.opcao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 50px;
+  border: 1px solid #bfcfe0;
+  margin-right: 14px;
+  cursor: pointer;
+  background: #fff;
+  transition: 0.2s;
+}
+
+.opcao:hover {
+  background: #eaf4ff;
+  border-color: #0f4c75;
+}
+
+.opcao input { transform: scale(1.25); }
+
+button {
+  border: none;
+  background: linear-gradient(135deg, #0f4c75, #3282b8);
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 50px;
+  font-size: 15px;
+  cursor: pointer;
+  margin-top: 20px;
+  float: right;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  box-shadow: 0 10px 20px rgba(15,76,117,0.27);
+}
+
+button:hover { filter: brightness(1.08); }
+
+#resultado {
+  margin-top: 20px;
+  display: none;
+  max-height: 380px;
+  overflow-y: auto;
+  padding-right: 10px;
+}
+
+.item-resposta {
+  padding: 8px 0;
+  border-bottom: 1px dashed #d5dfeb;
+  display: flex;
+  justify-content: space-between;
+}
+
+.correto { color: #16a085; }
+.errado { color: #c0392b; }
+
+</style>
+</head>
+
+<body>
+<div id="app">
+
+<h1>Teste Insano – Unidade V</h1>
+<h2>Escolhas de Tecnologias • 50 Questões Certo/Errado – Padrão CESPE</h2>
+
+<div class="top-bar">
+  <div class="badge">Avaliação Avançada</div>
+  <div id="contador">Questão 1 de 50</div>
+</div>
+
+<div class="progress-wrapper">
+  <div class="progress-labels">
+    <span>Progresso</span>
+    <span id="progress-percent">0%</span>
+  </div>
+  <div class="progress-bar-bg">
+    <div class="progress-bar-fill" id="progress-bar"></div>
+  </div>
+</div>
+
+<div id="quiz">
+
+  <div class="card">
+    <div class="questao-numero" id="questao-numero">Questão 1</div>
+    <div class="questao-texto" id="questao-texto"></div>
+
+    <label class="opcao">
+      <input type="radio" name="resp" value="C"> Certo
+    </label>
+
+    <label class="opcao">
+      <input type="radio" name="resp" value="E"> Errado
+    </label>
+
+    <button onclick="proxima()">Avançar ➜</button>
+  </div>
+</div>
+
+<div id="resultado"></div>
+
+<script>
+// QUESTÕES INSANAS (50)
+const questoes = [
+{ t:"Em uma empresa que usa ERP em tempo real, usar Wi-Fi como backbone principal garante estabilidade semelhante à fibra.", c:"E" },
+{ t:"Ambientes hospitalares críticos devem usar cabeamento Cat6 ou fibra, nunca Wi-Fi como principal.", c:"C" },
+{ t:"VPN sobre Internet comum é mais estável que MPLS para conectar filiais críticas.", c:"E" },
+{ t:"Grande volume de arquivos justifica backbone em fibra óptica mesmo com rede Cat6.", c:"C" },
+{ t:"Link dedicado melhora SLA e latência, mas não obriga aumento de velocidade.", c:"C" },
+{ t:"Muitos dispositivos IoT exigem VLAN para reduzir broadcast e aumentar segurança.", c:"C" },
+{ t:"Wi-Fi corporativo com senha única é seguro em ambientes com alta rotatividade.", c:"E" },
+{ t:"Dual-homing garante continuidade mesmo com falha de um link.", c:"C" },
+{ t:"QoS é essencial para videoconferências corporativas.", c:"C" },
+{ t:"Servidores críticos devem receber DHCP dinâmico para facilitar reorganização.", c:"E" },
+{ t:"Switches PoE são recomendados para câmeras IP.", c:"C" },
+{ t:"Firewalls NGFW inspecionam tráfego criptografado, coisa que firewalls clássicos não fazem.", c:"C" },
+{ t:"Wi-Fi 2.4 GHz é melhor que 5 GHz em alta densidade.", c:"E" },
+{ t:"Redundância de links é essencial em empresas orientadas à nuvem.", c:"C" },
+{ t:"802.1X é superior a MAC Filtering em segurança corporativa.", c:"C" },
+{ t:"Ambientes industriais devem priorizar fibra devido à interferência elétrica.", c:"C" },
+{ t:"Switch não-gerenciável mantém segurança sem comprometer a administração.", c:"E" },
+{ t:"SD-WAN pode substituir MPLS combinando múltiplos links.", c:"C" },
+{ t:"DNS local melhora acesso a serviços internos.", c:"C" },
+{ t:"VoIP exige cabeamento estruturado e QoS.", c:"C" },
+{ t:"LDAP/Radius reduzem risco de credenciais fora de controle.", c:"C" },
+{ t:"IPv6 elimina NAT e melhora conectividade fim a fim.", c:"C" },
+{ t:"Publicar servidor sem firewall é aceitável se houver senha forte.", c:"E" },
+{ t:"VLAN reduz broadcast e melhora desempenho.", c:"C" },
+{ t:"Wi-Fi WPA3-Enterprise é superior ao WPA2-Personal em empresas.", c:"C" },
+{ t:"Cloud híbrida aumenta flexibilidade e otimiza desempenho.", c:"C" },
+{ t:"Falha de internet paralisa cartórios, contabilidades e hospitais sem redundância.", c:"C" },
+{ t:"Switch core deve operar como camada 3 para rotear VLANs.", c:"C" },
+{ t:"Recomenda-se 1 AP para cada 25–30 usuários.", c:"C" },
+{ t:"Cabo coaxial é recomendado para servidores modernos.", c:"E" },
+{ t:"Firewall único protege toda a rede sem necessidade de segmentação interna.", c:"E" },
+{ t:"SDN separa plano de controle e de dados.", c:"C" },
+{ t:"IPv6 é essencial em ambientes com milhares de dispositivos.", c:"C" },
+{ t:"Latência importa mais que banda em WAN distribuída.", c:"C" },
+{ t:"Firewalls aplicam regras diferentes por VLAN, aumentando segurança.", c:"C" },
+{ t:"VPN site-to-site é essencial para integrar nuvem e servidores locais.", c:"C" },
+{ t:"Cat5e atende 10Gbps em longas distâncias internas.", c:"E" },
+{ t:"Em VoIP, jitter pode ser mais prejudicial que perda de pacotes.", c:"C" },
+{ t:"Wi-Fi 6 melhora redes densas comparado ao Wi-Fi 5.", c:"C" },
+{ t:"Monitoramento SNMP/NetFlow detecta quedas, ataques e gargalos.", c:"C" },
+{ t:"DHCP centralizado evita conflitos e melhora administração.", c:"C" },
+{ t:"Energia redundante é tão crítica quanto rede redundante.", c:"C" },
+{ t:"Empresas em nuvem não precisam se preocupar com latência.", c:"E" },
+{ t:"Migrar para IPv6 melhora performance e conexões P2P.", c:"C" },
+{ t:"Switches com STP/RSTP evitam loops de rede.", c:"C" },
+{ t:"Proxy reverso aumenta segurança e desempenho.", c:"C" },
+{ t:"APs de teto são ideais para ambientes com muitos usuários móveis.", c:"C" },
+{ t:"Reduzir latência é mais importante que aumentar banda em cloud.", c:"C" },
+{ t:"Acessar sistemas internos via DNS é mais seguro que via IP direto.", c:"C" },
+{ t:"Tecnologias devem ser escolhidas considerando latência, segurança, custo e escalabilidade.", c:"C" }
+];
+
+let i=0, pontos=0;
+let respostas=[];
+
+function atualizarUI(){
+  document.getElementById("questao-numero").innerText="Questão "+(i+1);
+  document.getElementById("questao-texto").innerText=questoes[i].t;
+  document.getElementById("contador").innerText=`Questão ${i+1} de ${questoes.length}`;
+  let p = Math.round((i/questoes.length)*100);
+  document.getElementById("progress-bar").style.width=p+"%";
+  document.getElementById("progress-percent").innerText=p+"%";
+  document.querySelectorAll('input[name="resp"]').forEach(e=>e.checked=false);
+}
+
+function proxima(){
+  let r=document.querySelector('input[name="resp"]:checked');
+  if(!r){ alert("Selecione uma opção!"); return; }
+
+  let correta=questoes[i].c;
+  let acertou = (r.value===correta);
+  if(acertou) pontos++;
+
+  respostas.push({ n:i+1, acertou, correta });
+
+  i++;
+  if(i<questoes.length) atualizarUI();
+  else mostrarResultado();
+}
+
+function mostrarResultado(){
+  document.getElementById("quiz").style.display="none";
+  let html=`<h2 style='margin-top:0;'>Resultado Final</h2>
+            <h3 style='color:#0f4c75; font-size:22px;'>Pontuação: ${pontos} / ${questoes.length}</h3>
+            <hr><div>`;
+
+  respostas.forEach(r=>{
+    html+=`
+      <div class="item-resposta">
+        <span><b>Questão ${r.n}</b></span>
+        <span class="${r.acertou?'correto':'errado'}">
+          ${r.acertou?'✔ Acertou':'✘ Errou'} — Gabarito: ${r.correta}
+        </span>
+      </div>`;
+  });
+
+  html+="</div>";
+  let res=document.getElementById("resultado");
+  res.innerHTML=html;
+  res.style.display="block";
+}
+
+atualizarUI();
+</script>
+
+</div>
+</body>
+</html>
